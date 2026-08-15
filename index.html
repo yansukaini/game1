@@ -80,6 +80,37 @@
         font-size: 13px;
     }
 
+    #mobileJoystick {
+        position: fixed;
+        left: 22px;
+        bottom: 28px;
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: rgba(255,255,255,.08);
+        border: 2px solid rgba(255,255,255,.16);
+        z-index: 8;
+        display: none;
+        touch-action: none;
+    }
+
+    #joystickKnob {
+        position: absolute;
+        width: 54px;
+        height: 54px;
+        left: 31px;
+        top: 31px;
+        border-radius: 50%;
+        background: rgba(83,109,254,.75);
+        border: 2px solid rgba(255,255,255,.35);
+        box-shadow: 0 0 20px rgba(83,109,254,.35);
+    }
+
+    @media (pointer: coarse) {
+        #mobileJoystick { display: block; }
+        #help { bottom: 160px; }
+    }
+
     #help {
         position: fixed;
         bottom: 15px;
@@ -229,6 +260,10 @@
 <body>
 
 <canvas id="game"></canvas>
+
+<div id="mobileJoystick" aria-label="Joystick untuk bergerak">
+    <div id="joystickKnob"></div>
+</div>
 
 <div id="ui">
     <div class="panel">
@@ -382,6 +417,57 @@ window.addEventListener("resize", resize);
 resize();
 
 const keys = {};
+
+// MOBILE TOUCH JOYSTICK
+const joystick = document.getElementById("mobileJoystick");
+const joystickKnob = document.getElementById("joystickKnob");
+let joystickActive = false;
+let joystickPointerId = null;
+let joystickX = 0;
+let joystickY = 0;
+const joystickRadius = 43;
+
+function updateJoystick(clientX, clientY) {
+    const rect = joystick.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    let dx = clientX - cx;
+    let dy = clientY - cy;
+    const dist = Math.hypot(dx, dy);
+    if (dist > joystickRadius) {
+        dx = dx / dist * joystickRadius;
+        dy = dy / dist * joystickRadius;
+    }
+    joystickX = dx / joystickRadius;
+    joystickY = dy / joystickRadius;
+    joystickKnob.style.transform = `translate(${dx}px, ${dy}px)`;
+}
+
+function resetJoystick() {
+    joystickActive = false;
+    joystickPointerId = null;
+    joystickX = 0;
+    joystickY = 0;
+    joystickKnob.style.transform = "translate(0, 0)";
+}
+
+joystick.addEventListener("pointerdown", e => {
+    joystickActive = true;
+    joystickPointerId = e.pointerId;
+    joystick.setPointerCapture(e.pointerId);
+    updateJoystick(e.clientX, e.clientY);
+    e.preventDefault();
+});
+
+joystick.addEventListener("pointermove", e => {
+    if (!joystickActive || e.pointerId !== joystickPointerId) return;
+    updateJoystick(e.clientX, e.clientY);
+    e.preventDefault();
+});
+
+joystick.addEventListener("pointerup", resetJoystick);
+joystick.addEventListener("pointercancel", resetJoystick);
+joystick.addEventListener("lostpointercapture", resetJoystick);
 
 window.addEventListener("keydown", e => {
     keys[e.key.toLowerCase()] = true;
@@ -631,6 +717,12 @@ function update(dt) {
     if (keys["s"] || keys["arrowdown"]) dy++;
     if (keys["a"] || keys["arrowleft"]) dx--;
     if (keys["d"] || keys["arrowright"]) dx++;
+
+    // Input joystick HP
+    if (joystickActive) {
+        dx += joystickX;
+        dy += joystickY;
+    }
 
     if (dx !== 0 || dy !== 0) {
 
