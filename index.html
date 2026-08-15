@@ -106,7 +106,7 @@
         box-shadow: 0 0 20px rgba(83,109,254,.35);
     }
 
-    @media (pointer: coarse) {
+    @media (pointer: coarse), (max-width: 900px) {
         #mobileJoystick { display: block; }
         #help { bottom: 160px; }
     }
@@ -427,6 +427,11 @@ let joystickX = 0;
 let joystickY = 0;
 const joystickRadius = 43;
 
+// Pastikan joystick muncul pada HP meskipun browser tidak mendeteksi pointer: coarse
+if ("ontouchstart" in window || navigator.maxTouchPoints > 0 || window.innerWidth <= 900) {
+    joystick.style.display = "block";
+}
+
 function updateJoystick(clientX, clientY) {
     const rect = joystick.getBoundingClientRect();
     const cx = rect.left + rect.width / 2;
@@ -454,7 +459,7 @@ function resetJoystick() {
 joystick.addEventListener("pointerdown", e => {
     joystickActive = true;
     joystickPointerId = e.pointerId;
-    joystick.setPointerCapture(e.pointerId);
+    if (joystick.setPointerCapture) joystick.setPointerCapture(e.pointerId);
     updateJoystick(e.clientX, e.clientY);
     e.preventDefault();
 });
@@ -468,6 +473,26 @@ joystick.addEventListener("pointermove", e => {
 joystick.addEventListener("pointerup", resetJoystick);
 joystick.addEventListener("pointercancel", resetJoystick);
 joystick.addEventListener("lostpointercapture", resetJoystick);
+
+// Fallback touch events untuk HP/browser yang tidak meneruskan Pointer Events
+joystick.addEventListener("touchstart", e => {
+    const t = e.touches[0];
+    if (!t) return;
+    joystickActive = true;
+    updateJoystick(t.clientX, t.clientY);
+    e.preventDefault();
+}, { passive: false });
+
+joystick.addEventListener("touchmove", e => {
+    if (!joystickActive) return;
+    const t = e.touches[0];
+    if (!t) return;
+    updateJoystick(t.clientX, t.clientY);
+    e.preventDefault();
+}, { passive: false });
+
+joystick.addEventListener("touchend", resetJoystick, { passive: false });
+joystick.addEventListener("touchcancel", resetJoystick, { passive: false });
 
 window.addEventListener("keydown", e => {
     keys[e.key.toLowerCase()] = true;
