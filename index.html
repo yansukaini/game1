@@ -80,6 +80,116 @@
         font-size: 13px;
     }
 
+    #shopBtn {
+        position: fixed;
+        top: 15px;
+        right: 15px;
+        z-index: 6;
+        padding: 10px 18px;
+        border-radius: 12px;
+        background: linear-gradient(90deg, #eab308, #f59e0b);
+        color: #000;
+        font-weight: bold;
+        border: none;
+        cursor: pointer;
+        font-size: 14px;
+        box-shadow: 0 4px 15px rgba(234,179,8,.3);
+        pointer-events: auto;
+    }
+
+    #shopBtn:hover {
+        transform: translateY(-2px);
+    }
+
+    #shopModal {
+        position: fixed;
+        inset: 0;
+        z-index: 30;
+        display: none;
+        justify-content: center;
+        align-items: center;
+        background: rgba(0,0,0,.75);
+        backdrop-filter: blur(10px);
+    }
+
+    .shopBox {
+        width: min(520px, 92%);
+        padding: 28px;
+        border-radius: 22px;
+        background: linear-gradient(145deg, #151b27, #0b0f17);
+        border: 1px solid rgba(255,255,255,.12);
+        box-shadow: 0 20px 70px rgba(0,0,0,.55);
+    }
+
+    .shopBox h2 {
+        text-align: center;
+        margin-bottom: 10px;
+        color: #facc15;
+    }
+
+    .coinDisplay {
+        text-align: center;
+        font-size: 20px;
+        margin-bottom: 20px;
+        color: #fde047;
+    }
+
+    .shopItems {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+
+    .item {
+        padding: 16px 12px;
+        border-radius: 14px;
+        background: #1d2635;
+        border: 1px solid #303b4d;
+        cursor: pointer;
+        transition: .2s;
+        text-align: center;
+    }
+
+    .item:hover {
+        transform: translateY(-3px);
+        border-color: #facc15;
+        background: #263247;
+    }
+
+    .item .icon {
+        font-size: 28px;
+        margin-bottom: 6px;
+    }
+
+    .item b {
+        display: block;
+        margin-bottom: 4px;
+        font-size: 14px;
+    }
+
+    .item .price {
+        color: #facc15;
+        font-weight: bold;
+        font-size: 13px;
+    }
+
+    .item small {
+        color: #9ca3af;
+        font-size: 11px;
+    }
+
+    #closeShop {
+        margin-top: 18px;
+        width: 100%;
+        background: #374151;
+    }
+
+    @media(max-width:600px) {
+        .shopItems {
+            grid-template-columns: 1fr;
+        }
+    }
+
     #mobileJoystick {
         position: fixed;
         left: 22px;
@@ -261,6 +371,42 @@
 
 <canvas id="game"></canvas>
 
+<button id="shopBtn" onclick="openShop()">🛒 TOKO • Uang: <span id="coinLabel">0</span></button>
+
+<div id="shopModal">
+    <div class="shopBox">
+        <h2>🛒 TOKO PENINGKATAN</h2>
+        <div class="coinDisplay">💰 Uang: <span id="shopCoin">0</span></div>
+        <div class="shopItems">
+            <div class="item" onclick="buyItem('damage')">
+                <div class="icon">⚔️</div>
+                <b>Serangan Kuat</b>
+                <div class="price">💰 50</div>
+                <small>Damage +15</small>
+            </div>
+            <div class="item" onclick="buyItem('speed')">
+                <div class="icon">💨</div>
+                <b>Lari Cepat</b>
+                <div class="price">💰 60</div>
+                <small>Kecepatan +12%</small>
+            </div>
+            <div class="item" onclick="buyItem('fire')">
+                <div class="icon">🔥</div>
+                <b>Tembak Cepat</b>
+                <div class="price">💰 80</div>
+                <small>Jeda tembak berkurang</small>
+            </div>
+            <div class="item" onclick="buyItem('heal')">
+                <div class="icon">❤️</div>
+                <b>Pulihkan Darah</b>
+                <div class="price">💰 70</div>
+                <small>HP pulih 40%</small>
+            </div>
+        </div>
+        <button id="closeShop" onclick="closeShop()">TUTUP TOKO</button>
+    </div>
+</div>
+
 <div id="mobileJoystick" aria-label="Joystick untuk bergerak">
     <div id="joystickKnob"></div>
 </div>
@@ -282,6 +428,7 @@
         <div class="stats">
             <div>💀 Kill: <b id="kills">0</b></div>
             <div>🏆 Score: <b id="score">0</b></div>
+            <div>💰 Uang: <b id="coins">0</b></div>
             <div>⚔️ Damage: <b id="damage">20</b></div>
             <div>🔥 Fire Rate: <b id="fireRate">0.55</b>s</div>
         </div>
@@ -298,8 +445,9 @@
 
         <div class="subtitle">
             Bertahan hidup selama mungkin.<br>
-            Kalahkan monster, kumpulkan XP,<br>
-            dan jadilah survivor terkuat!
+            Kalahkan monster, kumpulkan XP & Uang,<br>
+            beli peningkatan di toko — HATI-HATI,<br>
+            kesulitan NAIK TERUS dan TIDAK ADA BATAS!
         </div>
 
         <button onclick="startGame()">▶ MULAI GAME</button>
@@ -309,21 +457,21 @@
 <div id="gameOver">
     <div class="box">
         <h1>GAME OVER</h1>
-        <div class="subtitle">Kamu telah dikalahkan oleh para monster.</div>
+        <div class="subtitle">Tidak ada yang bisa bertahan selamanya...</div>
 
         <div id="finalScore">
             Score: 0
         </div>
 
-        <button onclick="startGame()">🔄 MAIN LAGI</button>
+        <button onclick="startGame()">🔄 COBA LAGI</button>
     </div>
 </div>
 
 <div id="levelUp">
     <div class="upgradeBox">
         <h2>⬆️ LEVEL UP!</h2>
-        <p style="color:#9ca3af;margin-bottom:18px">
-            Pilih satu peningkatan
+        <p style="color:#ff7777;margin-bottom:18px">
+            ⚠️ Musuh SEMAKIN KUAT dan BANYAK! Pilih peningkatan cepat!
         </p>
 
         <div class="upgrades">
@@ -352,7 +500,7 @@
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
-// SOUND EFFECTS — Web Audio API (tanpa mengubah mekanik game)
+// SOUND EFFECTS — Web Audio API
 let audioCtx = null;
 function initAudio() {
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -391,7 +539,6 @@ function playKillSound() {
     osc.start(now);
     osc.stop(now + 0.21);
 
-    // Impact layer
     const impact = audioCtx.createOscillator();
     const impactGain = audioCtx.createGain();
     impact.type = "sine";
@@ -404,7 +551,37 @@ function playKillSound() {
     impact.start(now);
     impact.stop(now + 0.18);
 }
-
+function playBossRoarSound() {
+    if (!audioCtx) return;
+    const now = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = "sawtooth";
+    osc.frequency.setValueAtTime(85, now);
+    osc.frequency.exponentialRampToValueAtTime(35, now + 0.45);
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(0.45, now + 0.012);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.50);
+    osc.connect(gain).connect(audioCtx.destination);
+    osc.start(now);
+    osc.stop(now + 0.52);
+}
+function playBuySound() {
+    if (!audioCtx) return;
+    const now = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(523, now);
+    osc.frequency.setValueAtTime(659, now + 0.08);
+    osc.frequency.setValueAtTime(784, now + 0.16);
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(0.25, now + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.24);
+    osc.connect(gain).connect(audioCtx.destination);
+    osc.start(now);
+    osc.stop(now + 0.25);
+}
 
 let W, H;
 
@@ -427,7 +604,6 @@ let joystickX = 0;
 let joystickY = 0;
 const joystickRadius = 43;
 
-// Pastikan joystick muncul pada HP meskipun browser tidak mendeteksi pointer: coarse
 if ("ontouchstart" in window || navigator.maxTouchPoints > 0 || window.innerWidth <= 900) {
     joystick.style.display = "block";
 }
@@ -474,7 +650,6 @@ joystick.addEventListener("pointerup", resetJoystick);
 joystick.addEventListener("pointercancel", resetJoystick);
 joystick.addEventListener("lostpointercapture", resetJoystick);
 
-// Fallback touch events untuk HP/browser yang tidak meneruskan Pointer Events
 joystick.addEventListener("touchstart", e => {
     const t = e.touches[0];
     if (!t) return;
@@ -513,6 +688,8 @@ let player;
 let enemies = [];
 let bullets = [];
 let particles = [];
+let bossSpawned = false;
+let coins = 0;
 
 let running = false;
 let lastTime = 0;
@@ -529,6 +706,51 @@ let damage = 20;
 let speed = 260;
 let fireRate = 0.55;
 
+// Toko
+const shopPrices = {
+    damage: 50,
+    speed: 60,
+    fire: 80,
+    heal: 70
+};
+
+function openShop() {
+    document.getElementById("shopCoin").textContent = coins;
+    document.getElementById("shopModal").style.display = "flex";
+    running = false;
+}
+
+function closeShop() {
+    document.getElementById("shopModal").style.display = "none";
+    running = true;
+    lastTime = performance.now();
+    requestAnimationFrame(loop);
+}
+
+function buyItem(type) {
+    const price = shopPrices[type];
+    if (coins < price) {
+        alert("💰 Uang tidak cukup!");
+        return;
+    }
+
+    coins -= price;
+
+    if (type === "damage") {
+        damage += 15;
+    } else if (type === "speed") {
+        speed *= 1.12;
+    } else if (type === "fire") {
+        fireRate = Math.max(0.15, fireRate - 0.1);
+    } else if (type === "heal") {
+        player.hp = Math.min(player.maxHp, player.hp + player.maxHp * 0.4);
+    }
+
+    playBuySound();
+    updateUI();
+    document.getElementById("shopCoin").textContent = coins;
+}
+
 function resetGame() {
     player = {
         x: W / 2,
@@ -541,6 +763,8 @@ function resetGame() {
     enemies = [];
     bullets = [];
     particles = [];
+    bossSpawned = false;
+    coins = 0;
 
     kills = 0;
     score = 0;
@@ -560,6 +784,7 @@ function startGame() {
     document.getElementById("startScreen").style.display = "none";
     document.getElementById("gameOver").style.display = "none";
     document.getElementById("levelUp").style.display = "none";
+    document.getElementById("shopModal").style.display = "none";
 
     resetGame();
 
@@ -573,7 +798,7 @@ function gameOver() {
     running = false;
 
     document.getElementById("finalScore").textContent =
-        `Score: ${score} • Kill: ${kills} • Level: ${level}`;
+        `Score: ${score} • Kill: ${kills} • Level: ${level} • Uang: ${coins}`;
 
     document.getElementById("gameOver").style.display = "flex";
 }
@@ -588,58 +813,77 @@ function updateUI() {
     document.getElementById("level").textContent = level;
     document.getElementById("kills").textContent = kills;
     document.getElementById("score").textContent = score;
+    document.getElementById("coins").textContent = coins;
+    document.getElementById("coinLabel").textContent = coins;
     document.getElementById("damage").textContent = damage;
     document.getElementById("fireRate").textContent = fireRate.toFixed(2);
 }
 
 function spawnEnemy() {
+    // KESULITAN TANPA BATAS — Semakin tinggi level, musuh JAUH lebih kuat
+    const difficultyMultiplier = 1 + (level - 1) * 0.18 + Math.pow((level - 1) / 25, 1.8);
 
     const side = Math.floor(Math.random() * 4);
-
     let x, y;
 
-    if (side === 0) {
-        x = Math.random() * W;
-        y = -40;
-    }
+    if (side === 0) { x = Math.random() * W; y = -40; }
+    if (side === 1) { x = W + 40; y = Math.random() * H; }
+    if (side === 2) { x = Math.random() * W; y = H + 40; }
+    if (side === 3) { x = -40; y = Math.random() * H; }
 
-    if (side === 1) {
-        x = W + 40;
-        y = Math.random() * H;
-    }
-
-    if (side === 2) {
-        x = Math.random() * W;
-        y = H + 40;
-    }
-
-    if (side === 3) {
-        x = -40;
-        y = Math.random() * H;
-    }
-
-    const difficulty = 1 + level * 0.08;
+    const baseSpeed = 65 + Math.random() * 30;
+    const baseHp = 30 + level * 12;
+    const baseDamage = 10 + level * 2.5;
 
     enemies.push({
         x,
         y,
-        radius: 15 + Math.random() * 7,
-        speed: (65 + Math.random() * 30) * difficulty,
-        hp: 30 + level * 5,
-        maxHp: 30 + level * 5,
-        damage: 10 + level * .7
+        radius: 15 + Math.random() * 7 + Math.min(level * 0.3, 12),
+        speed: Math.min(baseSpeed * difficultyMultiplier, 520),
+        hp: Math.floor(baseHp * difficultyMultiplier),
+        maxHp: Math.floor(baseHp * difficultyMultiplier),
+        damage: baseDamage * difficultyMultiplier,
+        isBoss: false
     });
 }
 
-function shoot() {
+function spawnBoss() {
+    const side = Math.floor(Math.random() * 4);
+    let x, y;
 
+    if (side === 0) { x = W / 2; y = -100; }
+    if (side === 1) { x = W + 100; y = H / 2; }
+    if (side === 2) { x = W / 2; y = H + 100; }
+    if (side === 3) { x = -100; y = H / 2; }
+
+    const bossLevel = Math.floor(level / 5);
+    // Bos makin kuat drastis tiap muncul, TIDAK ADA BATAS
+    const bossHp = 800 + bossLevel * 700 + Math.pow(bossLevel, 2.2) * 180;
+    const bossSpeed = 45 + bossLevel * 12;
+    const bossDamage = 35 + bossLevel * 15;
+
+    enemies.push({
+        x,
+        y,
+        radius: 55 + Math.min(bossLevel * 2.5, 35),
+        speed: Math.min(bossSpeed, 340),
+        hp: Math.floor(bossHp),
+        maxHp: Math.floor(bossHp),
+        damage: bossDamage,
+        isBoss: true
+    });
+
+    bossSpawned = true;
+    playBossRoarSound();
+}
+
+function shoot() {
     if (enemies.length === 0) return;
 
     let closest = null;
     let closestDist = Infinity;
 
     for (const enemy of enemies) {
-
         const dx = enemy.x - player.x;
         const dy = enemy.y - player.y;
         const dist = dx * dx + dy * dy;
@@ -670,56 +914,44 @@ function shoot() {
 }
 
 function addXP(amount) {
-
     xp += amount;
 
     while (xp >= xpNeeded) {
-
         xp -= xpNeeded;
-
         level++;
+        // XP makin berat terus, tidak ada ujung
+        xpNeeded = Math.floor(xpNeeded * 1.45 + level * 8);
 
-        xpNeeded = Math.floor(xpNeeded * 1.35);
+        if (level % 5 === 0 && !bossSpawned) {
+            spawnBoss();
+        }
 
         running = false;
-
         document.getElementById("levelUp").style.display = "flex";
-
         break;
     }
 }
 
 function upgrade(type) {
-
     if (type === "damage") {
         damage += 10;
-    }
-
-    if (type === "speed") {
+    } else if (type === "speed") {
         speed *= 1.15;
-    }
-
-    if (type === "fire") {
+    } else if (type === "fire") {
         fireRate = Math.max(0.15, fireRate - 0.08);
     }
 
     document.getElementById("levelUp").style.display = "none";
-
     running = true;
     lastTime = performance.now();
-
     updateUI();
-
     requestAnimationFrame(loop);
 }
 
 function createParticles(x, y, amount = 8) {
-
     for (let i = 0; i < amount; i++) {
-
         const angle = Math.random() * Math.PI * 2;
         const power = 40 + Math.random() * 100;
-
         particles.push({
             x,
             y,
@@ -733,7 +965,6 @@ function createParticles(x, y, amount = 8) {
 }
 
 function update(dt) {
-
     // PLAYER MOVEMENT
     let dx = 0;
     let dy = 0;
@@ -743,19 +974,15 @@ function update(dt) {
     if (keys["a"] || keys["arrowleft"]) dx--;
     if (keys["d"] || keys["arrowright"]) dx++;
 
-    // Input joystick HP
     if (joystickActive) {
         dx += joystickX;
         dy += joystickY;
     }
 
     if (dx !== 0 || dy !== 0) {
-
         const length = Math.hypot(dx, dy);
-
         dx /= length;
         dy /= length;
-
         player.x += dx * speed * dt;
         player.y += dy * speed * dt;
     }
@@ -763,22 +990,25 @@ function update(dt) {
     player.x = Math.max(player.radius, Math.min(W - player.radius, player.x));
     player.y = Math.max(player.radius, Math.min(H - player.radius, player.y));
 
-    // SPAWN ENEMIES
+    // SPAWN ENEMIES — Semakin lama SEMAKIN CEPAT dan BANYAK
     spawnTimer -= dt;
-
     const spawnRate = Math.max(
-        0.22,
-        0.85 - level * 0.025
+        0.06, // Batas minimal jeda — sangat cepat
+        0.95 - level * 0.045
     );
 
+    // Spawn ganda otomatis di level tinggi
+    const spawnCount = level < 10 ? 1 : Math.min(Math.floor(level / 8) + 1, 6);
+
     if (spawnTimer <= 0) {
-        spawnEnemy();
+        for (let i = 0; i < spawnCount; i++) {
+            spawnEnemy();
+        }
         spawnTimer = spawnRate;
     }
 
     // SHOOT
     shootTimer -= dt;
-
     if (shootTimer <= 0) {
         shoot();
         shootTimer = fireRate;
@@ -786,87 +1016,58 @@ function update(dt) {
 
     // BULLETS
     for (let i = bullets.length - 1; i >= 0; i--) {
-
         const b = bullets[i];
-
         b.x += b.vx * dt;
         b.y += b.vy * dt;
 
-        if (
-            b.x < -50 ||
-            b.x > W + 50 ||
-            b.y < -50 ||
-            b.y > H + 50
-        ) {
+        if (b.x < -50 || b.x > W + 50 || b.y < -50 || b.y > H + 50) {
             bullets.splice(i, 1);
             continue;
         }
 
         let hit = false;
-
         for (let j = enemies.length - 1; j >= 0; j--) {
-
             const e = enemies[j];
-
-            const dist = Math.hypot(
-                b.x - e.x,
-                b.y - e.y
-            );
+            const dist = Math.hypot(b.x - e.x, b.y - e.y);
 
             if (dist < b.radius + e.radius) {
-
                 e.hp -= b.damage;
-
                 createParticles(b.x, b.y, 4);
-
                 bullets.splice(i, 1);
                 hit = true;
 
                 if (e.hp <= 0) {
-
-                    createParticles(e.x, e.y, 15);
-
+                    createParticles(e.x, e.y, e.isBoss ? 40 : 15);
                     enemies.splice(j, 1);
 
                     kills++;
-                    score += 10 * level;
+                    score += e.isBoss ? 500 + level * 25 : 10 * level;
+                    coins += e.isBoss ? 120 + level * 6 : 8 + Math.floor(level / 2);
                     playKillSound();
 
-                    addXP(25);
-                }
+                    addXP(e.isBoss ? 300 + level * 12 : 25 + level);
 
+                    if (e.isBoss) bossSpawned = false;
+                }
                 break;
             }
         }
-
         if (hit) continue;
     }
 
     // ENEMIES
     for (let i = enemies.length - 1; i >= 0; i--) {
-
         const e = enemies[i];
-
-        const angle = Math.atan2(
-            player.y - e.y,
-            player.x - e.x
-        );
+        const angle = Math.atan2(player.y - e.y, player.x - e.x);
 
         e.x += Math.cos(angle) * e.speed * dt;
         e.y += Math.sin(angle) * e.speed * dt;
 
-        const dist = Math.hypot(
-            player.x - e.x,
-            player.y - e.y
-        );
+        const dist = Math.hypot(player.x - e.x, player.y - e.y);
 
         if (dist < player.radius + e.radius) {
-
             player.hp -= e.damage * dt;
-
-            // Knockback
-            const push = 35 * dt;
-
+            const push = e.isBoss ? 60 * dt : 35 * dt;
             e.x -= Math.cos(angle) * push;
             e.y -= Math.sin(angle) * push;
 
@@ -881,170 +1082,139 @@ function update(dt) {
 
     // PARTICLES
     for (let i = particles.length - 1; i >= 0; i--) {
-
         const p = particles[i];
-
         p.x += p.vx * dt;
         p.y += p.vy * dt;
-
         p.vx *= .95;
         p.vy *= .95;
-
         p.life -= dt;
-
-        if (p.life <= 0) {
-            particles.splice(i, 1);
-        }
+        if (p.life <= 0) particles.splice(i, 1);
     }
 
     updateUI();
 }
 
 function drawBackground() {
-
     ctx.fillStyle = "#080b12";
     ctx.fillRect(0, 0, W, H);
 
-    // GRID
     const grid = 45;
-
     ctx.strokeStyle = "rgba(255,255,255,.035)";
     ctx.lineWidth = 1;
 
     for (let x = 0; x < W; x += grid) {
-
         ctx.beginPath();
         ctx.moveTo(x, 0);
         ctx.lineTo(x, H);
         ctx.stroke();
     }
-
     for (let y = 0; y < H; y += grid) {
-
         ctx.beginPath();
         ctx.moveTo(0, y);
         ctx.lineTo(W, y);
         ctx.stroke();
     }
 
-    // Arena glow
     const gradient = ctx.createRadialGradient(
-        W / 2,
-        H / 2,
-        100,
-        W / 2,
-        H / 2,
-        Math.max(W,H)
+        W / 2, H / 2, 100,
+        W / 2, H / 2, Math.max(W,H)
     );
-
     gradient.addColorStop(0, "rgba(40,80,120,.08)");
     gradient.addColorStop(1, "rgba(0,0,0,0)");
-
     ctx.fillStyle = gradient;
     ctx.fillRect(0,0,W,H);
 }
 
 function drawPlayer() {
-
     ctx.save();
-
     ctx.shadowBlur = 25;
     ctx.shadowColor = "#35d6ff";
 
     ctx.beginPath();
-    ctx.arc(
-        player.x,
-        player.y,
-        player.radius,
-        0,
-        Math.PI * 2
-    );
-
+    ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
     ctx.fillStyle = "#35d6ff";
     ctx.fill();
 
     ctx.shadowBlur = 0;
-
-    // Inner core
     ctx.beginPath();
-    ctx.arc(
-        player.x,
-        player.y,
-        7,
-        0,
-        Math.PI * 2
-    );
-
+    ctx.arc(player.x, player.y, 7, 0, Math.PI * 2);
     ctx.fillStyle = "#ffffff";
     ctx.fill();
-
     ctx.restore();
 }
 
 function drawEnemies() {
-
     for (const e of enemies) {
-
         ctx.save();
 
-        ctx.shadowBlur = 15;
-        ctx.shadowColor = "#ff405c";
+        if (e.isBoss) {
+            ctx.shadowBlur = 40 + Math.min(level * 1.5, 40);
+            ctx.shadowColor = "#b91c1c";
 
-        ctx.beginPath();
-        ctx.arc(
-            e.x,
-            e.y,
-            e.radius,
-            0,
-            Math.PI * 2
-        );
+            ctx.beginPath();
+            ctx.arc(e.x, e.y, e.radius, 0, Math.PI * 2);
+            ctx.fillStyle = "#7f1d1d";
+            ctx.fill();
 
-        ctx.fillStyle = "#ef334f";
-        ctx.fill();
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = "#fff";
+            ctx.beginPath();
+            ctx.arc(e.x - 18, e.y - 12, 10, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(e.x + 18, e.y - 12, 10, 0, Math.PI * 2);
+            ctx.fill();
 
-        ctx.shadowBlur = 0;
+            ctx.fillStyle = "#ff0000";
+            ctx.beginPath();
+            ctx.arc(e.x - 20, e.y - 12, 5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(e.x + 16, e.y - 12, 5, 0, Math.PI * 2);
+            ctx.fill();
 
-        // Eyes
-        ctx.fillStyle = "#fff";
+            ctx.fillStyle = "#000";
+            ctx.fillRect(e.x - 28, e.y + 10, 56, 8);
 
-        ctx.beginPath();
-        ctx.arc(
-            e.x - 5,
-            e.y - 3,
-            3,
-            0,
-            Math.PI * 2
-        );
-        ctx.fill();
+            ctx.font = "bold 14px Arial";
+            ctx.textAlign = "center";
+            ctx.fillStyle = "#ff4444";
+            ctx.fillText("☠️ BOS ☠️", e.x, e.y - e.radius - 15);
 
-        ctx.beginPath();
-        ctx.arc(
-            e.x + 5,
-            e.y - 3,
-            3,
-            0,
-            Math.PI * 2
-        );
-        ctx.fill();
+        } else {
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = "#ff405c";
 
-        // HP bar
+            ctx.beginPath();
+            ctx.arc(e.x, e.y, e.radius, 0, Math.PI * 2);
+            ctx.fillStyle = "#ef334f";
+            ctx.fill();
+
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = "#fff";
+            ctx.beginPath();
+            ctx.arc(e.x - 5, e.y - 3, 3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(e.x + 5, e.y - 3, 3, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
         const barWidth = e.radius * 2;
-
         ctx.fillStyle = "rgba(0,0,0,.5)";
         ctx.fillRect(
             e.x - barWidth / 2,
-            e.y - e.radius - 8,
+            e.y - e.radius - (e.isBoss ? 18 : 8),
             barWidth,
-            4
+            e.isBoss ? 10 : 4
         );
 
-        ctx.fillStyle = "#ff6b7d";
-
+        ctx.fillStyle = e.isBoss ? "#ff2222" : "#ff6b7d";
         ctx.fillRect(
             e.x - barWidth / 2,
-            e.y - e.radius - 8,
+            e.y - e.radius - (e.isBoss ? 18 : 8),
             barWidth * Math.max(0, e.hp / e.maxHp),
-            4
+            e.isBoss ? 10 : 4
         );
 
         ctx.restore();
@@ -1052,59 +1222,30 @@ function drawEnemies() {
 }
 
 function drawBullets() {
-
     for (const b of bullets) {
-
         ctx.save();
-
         ctx.shadowBlur = 15;
         ctx.shadowColor = "#fff";
-
         ctx.beginPath();
-
-        ctx.arc(
-            b.x,
-            b.y,
-            b.radius,
-            0,
-            Math.PI * 2
-        );
-
+        ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
         ctx.fillStyle = "#ffffff";
         ctx.fill();
-
         ctx.restore();
     }
 }
 
 function drawParticles() {
-
     for (const p of particles) {
-
-        ctx.globalAlpha = Math.max(
-            0,
-            p.life / p.maxLife
-        );
-
+        ctx.globalAlpha = Math.max(0, p.life / p.maxLife);
         ctx.beginPath();
-
-        ctx.arc(
-            p.x,
-            p.y,
-            p.size,
-            0,
-            Math.PI * 2
-        );
-
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
         ctx.fillStyle = "#67e8f9";
         ctx.fill();
     }
-
     ctx.globalAlpha = 1;
 }
 
 function draw() {
-
     drawBackground();
     drawParticles();
     drawBullets();
@@ -1113,14 +1254,9 @@ function draw() {
 }
 
 function loop(time) {
-
     if (!running) return;
 
-    const dt = Math.min(
-        (time - lastTime) / 1000,
-        0.033
-    );
-
+    const dt = Math.min((time - lastTime) / 1000, 0.033);
     lastTime = time;
 
     update(dt);
@@ -1129,7 +1265,6 @@ function loop(time) {
     requestAnimationFrame(loop);
 }
 
-// Initial screen rendering
 resetGame();
 draw();
 
